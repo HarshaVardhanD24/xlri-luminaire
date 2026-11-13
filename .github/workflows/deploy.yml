@@ -23,14 +23,25 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - name: Check the Google Sheet link is set
+        env:
+          VITE_SHEETS_ENDPOINT: ${{ vars.SHEETS_ENDPOINT }}
+        run: |
+          if [[ ! "$VITE_SHEETS_ENDPOINT" =~ ^https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec$ ]]; then
+            echo "::error::Add the SHEETS_ENDPOINT repository variable (your Apps Script web app URL ending in /exec). See DEPLOY.md step B3."
+            exit 1
+          fi
       - run: npm ci
       - run: npm test
       - run: npm run build
         env:
           # Your Apps Script web app URL (ends in /exec). Set it under
           # Settings → Secrets and variables → Actions → Variables → SHEETS_ENDPOINT.
-          # It is a public endpoint, not a secret. If unset, the site runs in demo mode.
+          # It is a public endpoint, not a secret. Scores are marked there, never in the browser.
           VITE_SHEETS_ENDPOINT: ${{ vars.SHEETS_ENDPOINT }}
+      - name: Make sure no answer key was bundled
+        run: |
+          if ls -R dist | grep -q answer-key; then echo "::error::Answer key found in the build"; exit 1; fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
