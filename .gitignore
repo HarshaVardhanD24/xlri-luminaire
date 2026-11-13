@@ -3,3 +3,6 @@ dist
 .DS_Store
 prototype
 .env.local
+
+# The answer key never goes to GitHub. Paste it into Apps Script > Script properties > ANSWER_KEY.
+answer-key.json
